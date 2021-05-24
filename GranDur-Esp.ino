@@ -69,7 +69,7 @@ void  loop () {
     {
      do
       {
-        delay(350);
+        delay(250);
         Serial.print(estado_uno);
         lcd.clear();
         lcd.print("Para comenzar");
