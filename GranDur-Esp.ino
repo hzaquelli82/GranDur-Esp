@@ -13,6 +13,7 @@ int boton_uno = 14;
 int boton_dos = 16;
 int pasos = 0;
 int envase;
+ing muestra;
 
 HX711 scale;
  
@@ -93,7 +94,21 @@ void  loop () {
       }while ((lectura == 0) || (estado_uno == HIGH));
      envase = lectura;
      Serial.println(envase);
-     
+     do
+      {
+        delay(250); 
+        lectura = scale.get_units();
+        estado_uno = digitalRead(boton_uno);
+        lcd.clear();
+        lcd.print("Llenar muestra");
+        lcd.setCursor(0, 1);
+        lcd.print(lectura);
+        lcd.setCursor(15,1);
+        lcd.print("g");
+      }while ((lectura == 0) || (estado_uno == HIGH));
+     muestra = lectura;
+     Serial.println(muestra);
+
     }
   Serial.println("FIN");  
   delay (5000);
