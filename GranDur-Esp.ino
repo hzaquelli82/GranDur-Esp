@@ -13,7 +13,7 @@ int boton_uno = 14;
 int boton_dos = 16;
 int pasos = 0;
 int envase;
-ing muestra;
+int muestra;
 
 HX711 scale;
  
