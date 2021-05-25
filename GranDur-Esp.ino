@@ -15,6 +15,7 @@ int pasos = 0;
 int envase;
 int muestra;
 
+
 HX711 scale;
  
 void  setup () {
@@ -58,11 +59,12 @@ void  loop () {
   int lectura = scale. get_units();
   int estado_uno = digitalRead (boton_uno);
   int estado_dos = digitalRead (boton_dos);
+  bool salto = false;
   
   if (estado_uno == LOW && estado_dos == LOW)
     {
       lcd.clear();
-      lcd.print("Configurar WiFi")
+      lcd.print("Configurar WiFi");
       WiFiManager wifiManager;
       wifiManager.startConfigPortal("OnDemandAP"); 
     }
@@ -105,9 +107,15 @@ void  loop () {
         lcd.print(lectura);
         lcd.setCursor(15,1);
         lcd.print("g");
-      }while ((lectura == 0) || (estado_uno == HIGH));
+        if (lectura > envase)
+        {
+          salto = true;
+        }
+      }while ((salto == false) || (estado_uno == HIGH));
      muestra = lectura;
+     Serial.println(envase);
      Serial.println(muestra);
+     delay(3000);
 
     }
   Serial.println("FIN");  
