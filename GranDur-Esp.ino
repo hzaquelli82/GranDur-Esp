@@ -12,8 +12,6 @@ const int LOADCELL_SCK_PIN = 13;
 int boton_uno = 14;
 int boton_dos = 16;
 int pasos = 0;
-int envase;
-int muestra;
 
 
 HX711 scale;
@@ -60,7 +58,14 @@ void  loop () {
   int estado_uno = digitalRead (boton_uno);
   int estado_dos = digitalRead (boton_dos);
   bool salto = false;
+  int envase = 0; //almacena el peso del envase vacío
+  int muestra = 0; //almacena el peso de la muestra
+  int granu = 0; //almacena el peso restante del tamizado
+  float granu_porc; // porcentaje granulometria
+  int durabilidad = 0; //almacena el peso restante luego del procedimiento de durabilidad
+  float durabilidad_porc; // porcentaje durabilidad
   
+  //Menú Inicial escondido
   if (estado_uno == LOW && estado_dos == LOW)
     {
       lcd.clear();
@@ -68,8 +73,9 @@ void  loop () {
       WiFiManager wifiManager;
       wifiManager.startConfigPortal("OnDemandAP"); 
     }
-  else
+  else //Inicia procedimientos
     {
+     // Para pedir inicio
      do
       {
         delay(250);
@@ -82,6 +88,9 @@ void  loop () {
       }while (estado_uno == HIGH);
      pasos++;
      Serial.print(pasos);
+     delay(1000);
+
+     // Para guardar tara de envase
      do
       {
         delay(250); 
@@ -96,6 +105,9 @@ void  loop () {
       }while ((lectura == 0) || (estado_uno == HIGH));
      envase = lectura;
      Serial.println(envase);
+     delay(1000);
+
+     // Para guardar peso de muestra total
      do
       {
         delay(250); 
@@ -115,9 +127,51 @@ void  loop () {
      muestra = lectura;
      Serial.println(envase);
      Serial.println(muestra);
-     delay(3000);
+     delay(1000);
+
+     // Pesar muestra tamizada para granulometría
+     do
+      {
+        delay(250); 
+        lectura = scale.get_units();
+        estado_uno = digitalRead(boton_uno);
+        lcd.clear();
+        lcd.print("Muestra Tamizada");
+        lcd.setCursor(0, 1);
+        lcd.print(lectura);
+        lcd.setCursor(15,1);
+        lcd.print("g");
+        if ((lectura > envase) && (lectura < muestra))
+        {
+          salto = true;
+        }
+      }while ((salto == false) || (estado_uno == HIGH));
+     granu = lectura;
+     Serial.println(envase);
+     Serial.println(muestra);
+     Serial.println(granu);
+     granu_porc = porcentajeCalc(envase, muestra, granu);
+     Serial.println(granu_porc);
+     lcd.clear();
+     lcd.print("Granulometria");
+     lcd.setCursor(0, 1);
+     lcd.print(granu_porc);
+     lcd.setCursor(15, 1);
+     lcd.print("%");
+     delay(5000);
 
     }
-  Serial.println("FIN");  
+  Serial.println("FIN");
   delay (5000);
+}
+
+float porcentajeCalc(int a,int b,int c)
+{
+  float x; //crea x
+  float m; // crea m para calcular peso de muestra
+  float g; // crea g para calcular peso de muestra tamizada
+  m=b-a; // calcula el peso de la muestra
+  g=c-a; // calcula el peso de la muestra tamizada
+  x=(g/m)*100; // calcula el porcentaje
+  return x; // devuelve el porcentaje calculado
 }
