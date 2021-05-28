@@ -160,9 +160,59 @@ void  loop () {
      lcd.print("%");
      delay(5000);
 
+     // Pesar muestra tamizada para durabilidad
+     do
+      {
+        delay(250); 
+        lectura = scale.get_units();
+        estado_uno = digitalRead(boton_uno);
+        lcd.clear();
+        lcd.print("Muestra Tester");
+        lcd.setCursor(0, 1);
+        lcd.print(lectura);
+        lcd.setCursor(15,1);
+        lcd.print("g");
+        if ((lectura > envase) && (lectura < muestra))
+        {
+          salto = true;
+        }
+      }while ((salto == false) || (estado_uno == HIGH));
+     durabilidad = lectura;
+     Serial.println(envase);
+     Serial.println(muestra);
+     Serial.println(granu);
+     Serial.println(durabilidad);
+     durabilidad_porc = porcentajeCalc(envase, granu, durabilidad);
+     Serial.println(durabilidad_porc);
+     lcd.clear();
+     lcd.print("Durabilidad");
+     lcd.setCursor(0, 1);
+     lcd.print(durabilidad_porc);
+     lcd.setCursor(15, 1);
+     lcd.print("%");
+     delay(5000);
+
     }
+  
+  // Muestra resultados y espera respuesta para enviar datos
+  do
+  {
+    delay (250);
+    estado_uno = digitalRead (boton_uno);
+    estado_dos = digitalRead (boton_dos);
+    lcd.clear();
+    lcd.print("G=");
+    lcd.setCursor(2, 0);
+    lcd.print(granu_porc);
+    lcd.setCursor(8, 0);
+    lcd.print("D=");
+    lcd.setCursor(10,0);
+    lcd.print(durabilidad_porc);
+    lcd.setCursor(0,1);
+    lcd.print("Desea Enviar?");
+  }while (estado_uno==HIGH && estado_dos==HIGH)
   Serial.println("FIN");
-  delay (5000);
+  delay(5000);
 }
 
 float porcentajeCalc(int a,int b,int c)
