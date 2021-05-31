@@ -4,6 +4,13 @@
 #include <WiFiManager.h>
 #include <LiquidCrystal_I2C.h>
 #include "HX711.h"
+#include <UbidotsMicroESP8266.h>
+
+#define TOKEN "BBFF-2tD7oEqC4Rvew03YL6hsJmsagtq3Hd"
+#define G_0 "60b178ad1d84723d361fc3d4" //ID Granulometría oculto
+#define D_0 "60b179631d84723f6d0e2afe" //ID Durabilidad oculto
+#define G_1 "60b1799e1d847240a9b1a275" //ID Granulometría visible
+#define D_1 "60b179d51d84724084d0edff" //ID Durabilidad visible
  
 // Create the lcd object address 0x3F and 16 columns x 2 rows 
 LiquidCrystal_I2C lcd (0x27, 16,2);
@@ -13,8 +20,9 @@ int boton_uno = 14;
 int boton_dos = 16;
 int pasos = 0;
 
-
 HX711 scale;
+
+Ubidots client(TOKEN);
  
 void  setup () {
   // Initialize the LCD connected 
@@ -38,8 +46,8 @@ void  setup () {
   Serial.begin(115200);
 
   scale.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
-  scale. set_scale(1831.7);
-  scale. tare();
+  scale.set_scale(1831.7);
+  scale.tare();
   
   delay (3000);
 }
@@ -71,7 +79,7 @@ void  loop () {
       lcd.clear();
       lcd.print("Configurar WiFi");
       WiFiManager wifiManager;
-      wifiManager.startConfigPortal("OnDemandAP"); 
+      wifiManager.startConfigPortal("GRANDUR_WIFI","Mtzt1585"); 
     }
   else //Inicia procedimientos
     {
@@ -79,7 +87,7 @@ void  loop () {
      do
       {
         delay(250);
-        Serial.print(estado_uno);
+        //Serial.print(estado_uno);
         lcd.clear();
         lcd.print("Para comenzar");
         lcd.setCursor(0, 1);
@@ -113,10 +121,11 @@ void  loop () {
         delay(250); 
         lectura = scale.get_units();
         estado_uno = digitalRead(boton_uno);
+        int m = lectura - envase;
         lcd.clear();
         lcd.print("Llenar muestra");
         lcd.setCursor(0, 1);
-        lcd.print(lectura);
+        lcd.print(m);
         lcd.setCursor(15,1);
         lcd.print("g");
         if (lectura > envase)
@@ -135,10 +144,11 @@ void  loop () {
         delay(250); 
         lectura = scale.get_units();
         estado_uno = digitalRead(boton_uno);
+        int g = lectura - envase;
         lcd.clear();
         lcd.print("Muestra Tamizada");
         lcd.setCursor(0, 1);
-        lcd.print(lectura);
+        lcd.print(g);
         lcd.setCursor(15,1);
         lcd.print("g");
         if ((lectura > envase) && (lectura < muestra))
@@ -158,6 +168,8 @@ void  loop () {
      lcd.print(granu_porc);
      lcd.setCursor(15, 1);
      lcd.print("%");
+     client.add(G_0,granu_porc);
+     client.sendAll(false); //enviar datos de manera oculta
      delay(5000);
 
      // Pesar muestra tamizada para durabilidad
@@ -166,10 +178,11 @@ void  loop () {
         delay(250); 
         lectura = scale.get_units();
         estado_uno = digitalRead(boton_uno);
+        int d = lectura - envase;
         lcd.clear();
         lcd.print("Muestra Tester");
         lcd.setCursor(0, 1);
-        lcd.print(lectura);
+        lcd.print(d);
         lcd.setCursor(15,1);
         lcd.print("g");
         if ((lectura > envase) && (lectura < muestra))
@@ -190,6 +203,8 @@ void  loop () {
      lcd.print(durabilidad_porc);
      lcd.setCursor(15, 1);
      lcd.print("%");
+     client.add(D_0,durabilidad_porc);
+     client.sendAll(false);
      delay(5000);
 
     }
@@ -210,7 +225,23 @@ void  loop () {
     lcd.print(durabilidad_porc);
     lcd.setCursor(0,1);
     lcd.print("Desea Enviar?");
-  }while (estado_uno==HIGH && estado_dos==HIGH)
+  }while (estado_uno==HIGH && estado_dos==HIGH);
+  if (estado_uno==0)
+  {
+    client.add(G_1,granu_porc);
+    client.add(D_1,durabilidad_porc);
+    client.sendAll(false);
+    delay(3000);
+    lcd.clear();
+    lcd.print("Datos Enviados");
+  }
+  else
+  {
+    lcd.clear();
+    lcd.print("Datos");
+    lcd.setCursor(0,1);
+    lcd.print("NO Enviados");
+  }
   Serial.println("FIN");
   delay(5000);
 }
