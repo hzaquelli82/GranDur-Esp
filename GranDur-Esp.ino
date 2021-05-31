@@ -6,11 +6,11 @@
 #include "HX711.h"
 #include <UbidotsMicroESP8266.h>
 
-#define TOKEN "BBFF-2tD7oEqC4Rvew03YL6hsJmsagtq3Hd"
-#define G_0 "60b178ad1d84723d361fc3d4" //ID Granulometría oculto
-#define D_0 "60b179631d84723f6d0e2afe" //ID Durabilidad oculto
-#define G_1 "60b1799e1d847240a9b1a275" //ID Granulometría visible
-#define D_1 "60b179d51d84724084d0edff" //ID Durabilidad visible
+#define TOKEN "****"
+#define G_0 "***" //ID Granulometría oculto
+#define D_0 "***" //ID Durabilidad oculto
+#define G_1 "***" //ID Granulometría visible
+#define D_1 "***" //ID Durabilidad visible
  
 // Create the lcd object address 0x3F and 16 columns x 2 rows 
 LiquidCrystal_I2C lcd (0x27, 16,2);
