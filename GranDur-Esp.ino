@@ -7,7 +7,7 @@
 #include <UbidotsMicroESP8266.h>
 
 #define TOKEN "****"
-#define G_0 "***" //ID Granulometría oculto
+#define G_0 "***" //ID Granulometría oculto no se ve
 #define D_0 "***" //ID Durabilidad oculto
 #define G_1 "***" //ID Granulometría visible
 #define D_1 "***" //ID Durabilidad visible
